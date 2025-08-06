@@ -5,29 +5,28 @@ const mongoose = require('mongoose');
 const contactSchema = new mongoose.Schema({
   name: {
     type: String,
-    required: [true, 'Name is required'],
-    trim: true
+    required: true,
+    trim: true,
   },
   email: {
     type: String,
-    required: [true, 'Email is required'],
+    required: true,
     trim: true,
-    lowercase: true,
-    match: [/.+@.+\..+/, 'Please enter a valid email address']
   },
-  phone: {
+  subject: {
     type: String,
+    required: true,
     trim: true,
-    match: [/^[0-9]{10}$/, 'Phone must be 10 digits']
   },
   message: {
     type: String,
-    required: [true, 'Message is required'],
+    required: true,
     trim: true,
-    maxlength: [1000, 'Message can be at most 1000 characters']
-  }
+  },
 }, {
-  timestamps: true
+  timestamps: true,
 });
 
-module.exports = mongoose.model('Contact', contactSchema);
+// ✅ Prevent OverwriteModelError
+module.exports = mongoose.models.Contact || mongoose.model('Contact', contactSchema);
+
