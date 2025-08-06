@@ -3,11 +3,31 @@
 const mongoose = require('mongoose');
 
 const contactSchema = new mongoose.Schema({
-  name: { type: String, required: true },
-  email: { type: String, required: true },
-  phone: { type: String },
-  message: { type: String, required: true },
-  createdAt: { type: Date, default: Date.now }
+  name: {
+    type: String,
+    required: [true, 'Name is required'],
+    trim: true
+  },
+  email: {
+    type: String,
+    required: [true, 'Email is required'],
+    trim: true,
+    lowercase: true,
+    match: [/.+@.+\..+/, 'Please enter a valid email address']
+  },
+  phone: {
+    type: String,
+    trim: true,
+    match: [/^[0-9]{10}$/, 'Phone must be 10 digits']
+  },
+  message: {
+    type: String,
+    required: [true, 'Message is required'],
+    trim: true,
+    maxlength: [1000, 'Message can be at most 1000 characters']
+  }
+}, {
+  timestamps: true
 });
 
 module.exports = mongoose.model('Contact', contactSchema);

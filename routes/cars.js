@@ -3,18 +3,22 @@
 const express = require('express');
 const router = express.Router();
 const Car = require('../models/Car');
-const authMiddleware = require('../middleware/authMiddleware');
 
-// GET all cars
+// GET all cars (with optional filters)
 router.get('/', async (req, res) => {
   try {
     const { category, maxPrice, minPrice, name } = req.query;
     let filter = {};
+
     if (category) filter.category = { $regex: `^${category}$`, $options: 'i' };
-    if (maxPrice) filter.pricePerDay = { ...filter.pricePerDay, $lte: parseInt(maxPrice) };
-    if (minPrice) filter.pricePerDay = { ...filter.pricePerDay, $gte: parseInt(minPrice) };
     if (name) filter.name = { $regex: name, $options: 'i' };
-    const cars = await Car.find(filter);
+    if (maxPrice || minPrice) {
+      filter.pricePerDay = {};
+      if (maxPrice) filter.pricePerDay.$lte = parseInt(maxPrice);
+      if (minPrice) filter.pricePerDay.$gte = parseInt(minPrice);
+    }
+
+    const cars = await Car.find(filter).sort({ createdAt: -1 });
     res.json(cars);
   } catch (err) {
     console.error('Error fetching cars:', err);
@@ -22,25 +26,35 @@ router.get('/', async (req, res) => {
   }
 });
 
-// POST add new car (Admin only)
-router.post('/', authMiddleware, async (req, res) => {
+// POST add new car (NO AUTH)
+router.post('/', async (req, res) => {
   try {
-    if (req.user.role !== 'admin') {
-      return res.status(403).json({ error: 'Access denied. Admin role required.' });
-    }
-    const { name, brand, plate, pricePerDay, features, category, imageUrl } = req.body;
-    if (!name || !brand || !plate || !pricePerDay || !category || !imageUrl) {
-      return res.status(400).json({ error: 'Missing required fields.' });
-    }
-    const newCar = new Car({
+    const {
       name,
       brand,
       plate,
       pricePerDay,
+      features,
+      category,
+      imageUrl,
+      imagePublicId
+    } = req.body;
+
+    if (!name || !brand || !plate || !pricePerDay || !category || !imageUrl) {
+      return res.status(400).json({ error: 'Missing required fields.' });
+    }
+
+    const newCar = new Car({
+      name,
+      brand,
+      plate,
+      pricePerDay: parseInt(pricePerDay),
       features: Array.isArray(features) ? features : [],
       category,
-      imageUrl
+      imageUrl,
+      imagePublicId: imagePublicId || null
     });
+
     const savedCar = await newCar.save();
     res.status(201).json(savedCar);
   } catch (err) {
@@ -64,16 +78,19 @@ router.get('/:id', async (req, res) => {
   }
 });
 
-// PUT update car by ID (Admin only)
-router.put('/:id', authMiddleware, async (req, res) => {
+// PUT update car by ID (NO AUTH)
+router.put('/:id', async (req, res) => {
   try {
-    if (req.user.role !== 'admin') {
-      return res.status(403).json({ error: 'Access denied. Admin role required.' });
+    const update = { ...req.body };
+    if (update.pricePerDay) {
+      update.pricePerDay = parseInt(update.pricePerDay);
     }
-    const updatedCar = await Car.findByIdAndUpdate(req.params.id, req.body, {
+
+    const updatedCar = await Car.findByIdAndUpdate(req.params.id, update, {
       new: true,
       runValidators: true
     });
+
     if (!updatedCar) return res.status(404).json({ error: 'Car not found' });
     res.json(updatedCar);
   } catch (err) {
@@ -82,15 +99,13 @@ router.put('/:id', authMiddleware, async (req, res) => {
   }
 });
 
-// DELETE car by ID (Admin only)
-router.delete('/:id', authMiddleware, async (req, res) => {
+// DELETE car by ID (NO AUTH)
+router.delete('/:id', async (req, res) => {
   try {
-    if (req.user.role !== 'admin') {
-      return res.status(403).json({ error: 'Access denied. Admin role required.' });
-    }
     const car = await Car.findByIdAndDelete(req.params.id);
     if (!car) return res.status(404).json({ error: 'Car not found' });
-    // Does not delete image from Cloudinary—images remain.
+
+    // Optionally delete Cloudinary image here
     res.json({ message: 'Car deleted successfully' });
   } catch (err) {
     console.error('Error deleting car:', err);

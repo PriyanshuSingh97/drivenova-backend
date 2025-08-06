@@ -5,6 +5,7 @@ const cors = require('cors');
 const session = require('express-session');
 const passport = require('passport');
 const connectDB = require('./db');
+
 const carRoutes = require('./routes/cars');
 const authRoutes = require('./routes/auth');
 const bookingRoutes = require('./routes/bookings');
@@ -17,48 +18,50 @@ const PORT = process.env.PORT || 5000;
 // ✅ Connect to MongoDB Atlas
 connectDB();
 
-// ✅ Middleware
+// ✅ Middleware for JSON and form data
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
+// ✅ Define allowed CORS origins (frontend & admin)
 const allowedOrigins = [
-  'http://127.0.0.1:5509',
+  'http://127.0.0.1:5500',
   'http://localhost:5500',
-  'https://admin-drivenova.netlify.app',
-  process.env.FRONTEND_URL,
-  'https://drivenova.onrender.com',
-].filter(Boolean);
+  'http://localhost:5501',
+  process.env.FRONTEND_URL || 'https://drivenova.onrender.com',
+  process.env.ADMIN_URL || 'https://admin-drivenova.netlify.app'
+];
 
+// ✅ Configure CORS
 app.use(
   cors({
     origin: function (origin, callback) {
-      // Allow requests with no origin (like curl)
+      // Allow requests with no origin (like curl or Postman)
       if (!origin || allowedOrigins.includes(origin)) {
         callback(null, true);
       } else {
-        callback(new Error('CORS policy does not allow access from this origin.'));
+        callback(new Error(`CORS blocked: ${origin} not allowed`));
       }
     },
     methods: ['GET', 'POST', 'PUT', 'DELETE'],
-    credentials: true,
+    credentials: true
   })
 );
 
-// ✅ Session middleware (for Google OAuth with Passport, but we use JWT everywhere else)
+// ✅ Express-session for Google OAuth login
 app.use(
   session({
-    secret: process.env.SESSION_SECRET || 'a-very-strong-and-long-random-secret-key',
+    secret: process.env.SESSION_SECRET || 'drive-nova-secret-key',
     resave: false,
     saveUninitialized: false,
     cookie: {
       secure: process.env.NODE_ENV === 'production',
       httpOnly: true,
-      sameSite: process.env.NODE_ENV === 'production' ? 'none' : 'lax',
+      sameSite: process.env.NODE_ENV === 'production' ? 'none' : 'lax'
     }
   })
 );
 
-// ✅ Initialize Passport (Google OAuth)
+// ✅ Initialize Passport.js
 app.use(passport.initialize());
 app.use(passport.session());
 
@@ -68,10 +71,12 @@ app.use('/api/bookings', bookingRoutes);
 app.use('/api/contact', contactRoutes);
 app.use('/api/auth', authRoutes);
 
-// ✅ Health Check Endpoint
+// ✅ Health check
 app.get('/', (req, res) => {
   res.json({ message: '✅ DriveNova backend is running!' });
 });
 
-// ✅ Start Server
-app.listen(PORT, () => console.log(`🚀 Server running on port ${PORT}`));
+// ✅ Start server
+app.listen(PORT, () => {
+  console.log(`🚀 Server is running on port ${PORT}`);
+});
