@@ -4,7 +4,7 @@ const express = require('express');
 const cors = require('cors');
 const session = require('express-session');
 const passport = require('passport');
-const connectDB = require('./db');
+const connectDB = require('./config/db');
 const carRoutes = require('./routes/cars');
 const authRoutes = require('./routes/auth');
 const bookingRoutes = require('./routes/bookings');
@@ -22,25 +22,23 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
 // ✅ CORS Configuration
+// ✅ FIXED: Added your production frontend URL to the list of allowed origins.
 const allowedOrigins = [
-  'http://127.0.0.1:5509',                // Local development (Live Server)
-  'http://localhost:3000',                // Local React (if applicable)
-  'http://localhost:5000',                // Alternate local dev port
-  'https://admin-drivenova.netlify.app',        // admin tool
-
-  process.env.FRONTEND_URL || 'https://drivenova33.netlify.app', // Production (Netlify)
-];
+  'http://127.0.0.1:5509',                // Local development (Live Server for admin tool)
+  'http://localhost:5500',                // Alternate local dev port
+  'https://admin-drivenova.netlify.app/',  // Deployed admin tool
+  process.env.FRONTEND_URL,               // Environment variable for production URL
+  'https://drivenova.onrender.com'        // Production Frontend URL
+].filter(Boolean); // Filter out undefined/null values
 
 app.use(
   cors({
     origin: function (origin, callback) {
-      console.log(`🔍 Incoming request origin: ${origin || 'Direct server call (no origin)'}`);
+      // Allow requests with no origin (like mobile apps or curl requests)
       if (!origin || allowedOrigins.includes(origin)) {
-        console.log(`✅ CORS allowed: ${origin}`);
         callback(null, true);
       } else {
-        console.warn(`❌ CORS blocked: ${origin}`);
-        callback(new Error('CORS blocked: Not allowed by server.'));
+        callback(new Error('CORS policy does not allow access from this origin.'));
       }
     },
     methods: ['GET', 'POST', 'PUT', 'DELETE'],
@@ -48,10 +46,12 @@ app.use(
   })
 );
 
+
 // ✅ Session middleware (needed for Passport.js)
 app.use(
   session({
-    secret: process.env.SESSION_SECRET || '8f2a7d1e2c9f4b76a1b38d6c7e5f90ab',
+    // It's highly recommended to use a long, random string for the secret in production.
+    secret: process.env.SESSION_SECRET || 'a-very-strong-and-long-random-secret-key',
     resave: false,
     saveUninitialized: false,
     cookie: {

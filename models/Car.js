@@ -9,6 +9,12 @@ const carSchema = new mongoose.Schema(
       required: [true, 'Car name is required'],
       trim: true
     },
+    // ✅ FIXED: Added brand field to match the frontend form
+    brand: {
+      type: String,
+      required: [true, 'Brand is required'],
+      trim: true
+    },
     plate: {
       type: String,
       required: [true, 'License plate is required'],
@@ -16,26 +22,28 @@ const carSchema = new mongoose.Schema(
       uppercase: true,
       trim: true
     },
-    price: {
+    // ✅ FIXED: Renamed 'price' to 'pricePerDay' to match frontend
+    pricePerDay: {
       type: Number,
-      required: [true, 'Price is required'],
+      required: [true, 'Price per day is required'],
       min: [0, 'Price must be positive']
     },
     features: {
       type: [String],
       default: []
     },
-    image: {
+    // ✅ FIXED: Renamed 'image' to 'imageUrl' to match frontend
+    imageUrl: {
       type: String,
       required: [true, 'Image URL is required'],
       trim: true,
       validate: {
-        validator: function (v) {
-          return /^https?:\/\/.+/.test(v);
-        },
+        validator: (v) => /^https?:\/\/.+/.test(v),
         message: 'Image must be a valid URL'
       }
     },
+    // ✅ FIXED: This field is no longer relevant to the new workflow
+    // but kept as optional in case you store public IDs manually.
     imagePublicId: {
       type: String,
       required: false
@@ -43,7 +51,8 @@ const carSchema = new mongoose.Schema(
     category: {
       type: String,
       required: [true, 'Category is required'],
-      enum: ['Sedan', 'SUV', 'Luxury', 'Electric', 'Truck', 'Other']
+      // ✅ FIXED: Changed to lowercase to match frontend filters
+      enum: ['sedan', 'suv', 'luxury', 'electric', 'truck', 'other']
     }
   },
   { timestamps: true }

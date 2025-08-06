@@ -4,25 +4,22 @@ const express = require('express');
 const router = express.Router();
 const Car = require('../models/Car');
 const authMiddleware = require('../middleware/authMiddleware');
-const multer = require('multer');
-const streamifier = require('streamifier');
-const cloudinary = require('../config/cloudinary');
-
-// Multer setup (memory storage for Cloudinary)
-const storage = multer.memoryStorage();
-const upload = multer({ storage });
+// Note: Multer and Cloudinary upload logic is removed as we are now accepting a URL.
 
 // GET all cars (with filters and search)
 router.get('/', async (req, res) => {
   try {
     const { category, maxPrice, minPrice, name } = req.query;
     let filter = {};
-    if (category) filter.category = { $regex: category, $options: 'i' };
-    if (maxPrice) filter.price = { ...filter.price, $lte: parseInt(maxPrice) };
-    if (minPrice) filter.price = { ...filter.price, $gte: parseInt(minPrice) };
+    if (category) filter.category = { $regex: `^${category}$`, $options: 'i' };
+    if (maxPrice) filter.pricePerDay = { ...filter.pricePerDay, $lte: parseInt(maxPrice) };
+    if (minPrice) filter.pricePerDay = { ...filter.pricePerDay, $gte: parseInt(minPrice) };
     if (name) filter.name = { $regex: name, $options: 'i' };
+    
     const cars = await Car.find(filter);
-    res.json({ data: cars });
+    
+    // ✅ FIXED: Return the array of cars directly, as the frontend expects.
+    res.json(cars);
   } catch (err) {
     console.error('Error fetching cars:', err);
     res.status(500).json({ error: 'Failed to fetch cars' });
@@ -30,43 +27,28 @@ router.get('/', async (req, res) => {
 });
 
 // POST add new car (Admin only)
-router.post('/', authMiddleware, upload.single('image'), async (req, res) => {
+// ✅ FIXED: Removed multer and changed logic to accept JSON with imageUrl.
+router.post('/', authMiddleware, async (req, res) => {
   try {
-    if (!req.user || req.user.role !== 'admin') {
+    if (req.user.role !== 'admin') {
       return res.status(403).json({ error: 'Access denied. Admin role required.' });
     }
-    const { name, plate, price, features, category } = req.body;
+    
+    // ✅ FIXED: Destructure all fields from req.body, including the new ones.
+    const { name, brand, plate, pricePerDay, features, category, imageUrl } = req.body;
 
-    if (!name || !plate || !price || !category) {
-      return res.status(400).json({ error: 'Missing required fields (name, plate, price, category)' });
+    if (!name || !brand || !plate || !pricePerDay || !category || !imageUrl) {
+      return res.status(400).json({ error: 'Missing required fields.' });
     }
-    if (!req.file) {
-      return res.status(400).json({ error: 'Image file is required' });
-    }
-
-    // Upload image to Cloudinary
-    const uploadResult = await new Promise((resolve, reject) => {
-      const stream = cloudinary.uploader.upload_stream({ folder: 'cars' }, (err, result) => {
-        if (err) reject(err);
-        else resolve(result);
-      });
-      streamifier.createReadStream(req.file.buffer).pipe(stream);
-    });
-
-    const carFeatures = Array.isArray(features)
-      ? features
-      : features
-      ? features.split(',').map(f => f.trim()).filter(Boolean)
-      : [];
 
     const newCar = new Car({
       name,
+      brand,
       plate,
-      price,
-      features: carFeatures,
-      image: uploadResult.secure_url,
+      pricePerDay,
+      features: Array.isArray(features) ? features : [],
       category,
-      imagePublicId: uploadResult.public_id // Store for easier deletion later
+      imageUrl,
     });
 
     const savedCar = await newCar.save();
@@ -74,6 +56,9 @@ router.post('/', authMiddleware, upload.single('image'), async (req, res) => {
 
   } catch (err) {
     console.error('Error adding new car:', err);
+    if (err.code === 11000) { // Handle duplicate plate error
+        return res.status(400).json({ error: 'A car with this license plate already exists.' });
+    }
     res.status(500).json({ error: 'Failed to add new car' });
   }
 });
@@ -91,35 +76,14 @@ router.get('/:id', async (req, res) => {
 });
 
 // PUT update car by ID (Admin only)
-router.put('/:id', authMiddleware, upload.single('image'), async (req, res) => {
+// ✅ FIXED: Removed multer to accept JSON data for updates.
+router.put('/:id', authMiddleware, async (req, res) => {
   try {
-    if (!req.user || req.user.role !== 'admin') {
+    if (req.user.role !== 'admin') {
       return res.status(403).json({ error: 'Access denied. Admin role required.' });
     }
 
-    const updateData = { ...req.body };
-
-    // Properly handle features
-    if (updateData.features) {
-      updateData.features = Array.isArray(updateData.features)
-        ? updateData.features
-        : updateData.features.split(',').map(f => f.trim()).filter(Boolean);
-    }
-
-    // Upload new image if provided
-    if (req.file) {
-      const uploadResult = await new Promise((resolve, reject) => {
-        const stream = cloudinary.uploader.upload_stream({ folder: 'cars' }, (err, result) => {
-          if (err) reject(err);
-          else resolve(result);
-        });
-        streamifier.createReadStream(req.file.buffer).pipe(stream);
-      });
-      updateData.image = uploadResult.secure_url;
-      updateData.imagePublicId = uploadResult.public_id;
-    }
-
-    const updatedCar = await Car.findByIdAndUpdate(req.params.id, updateData, { new: true });
+    const updatedCar = await Car.findByIdAndUpdate(req.params.id, req.body, { new: true, runValidators: true });
     if (!updatedCar) return res.status(404).json({ error: 'Car not found' });
     res.json(updatedCar);
 
@@ -132,19 +96,16 @@ router.put('/:id', authMiddleware, upload.single('image'), async (req, res) => {
 // DELETE car by ID (Admin only)
 router.delete('/:id', authMiddleware, async (req, res) => {
   try {
-    if (!req.user || req.user.role !== 'admin') {
+    if (req.user.role !== 'admin') {
       return res.status(403).json({ error: 'Access denied. Admin role required.' });
     }
 
-    const car = await Car.findById(req.params.id);
+    const car = await Car.findByIdAndDelete(req.params.id);
     if (!car) return res.status(404).json({ error: 'Car not found' });
+    
+    // ✅ FIXED: Removed Cloudinary deletion logic as it's no longer applicable.
+    // The image will now remain on Cloudinary, but the car is removed from the DB.
 
-    // Delete image from Cloudinary using stored public_id
-    if (car.imagePublicId) {
-      await cloudinary.uploader.destroy(car.imagePublicId);
-    }
-
-    await Car.findByIdAndDelete(req.params.id);
     res.json({ message: 'Car deleted successfully' });
 
   } catch (err) {
