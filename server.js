@@ -9,7 +9,7 @@ const carRoutes = require('./routes/cars');
 const authRoutes = require('./routes/auth');
 const bookingRoutes = require('./routes/bookings');
 const contactRoutes = require('./routes/contact');
-require('./config/passport'); // Google OAuth config
+require('./config/passport');
 
 const app = express();
 const PORT = process.env.PORT || 5000;
@@ -21,20 +21,18 @@ connectDB();
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
-// ✅ CORS Configuration
-// ✅ FIXED: Added your production frontend URL to the list of allowed origins.
 const allowedOrigins = [
-  'http://127.0.0.1:5509',                // Local development (Live Server for admin tool)
-  'http://localhost:5500',                // Alternate local dev port
-  'https://admin-drivenova.netlify.app/',  // Deployed admin tool
-  process.env.FRONTEND_URL,               // Environment variable for production URL
-  'https://drivenova.onrender.com'        // Production Frontend URL
-].filter(Boolean); // Filter out undefined/null values
+  'http://127.0.0.1:5509',
+  'http://localhost:5500',
+  'https://admin-drivenova.netlify.app',
+  process.env.FRONTEND_URL,
+  'https://drivenova.onrender.com',
+].filter(Boolean);
 
 app.use(
   cors({
     origin: function (origin, callback) {
-      // Allow requests with no origin (like mobile apps or curl requests)
+      // Allow requests with no origin (like curl)
       if (!origin || allowedOrigins.includes(origin)) {
         callback(null, true);
       } else {
@@ -46,19 +44,17 @@ app.use(
   })
 );
 
-
-// ✅ Session middleware (needed for Passport.js)
+// ✅ Session middleware (for Google OAuth with Passport, but we use JWT everywhere else)
 app.use(
   session({
-    // It's highly recommended to use a long, random string for the secret in production.
     secret: process.env.SESSION_SECRET || 'a-very-strong-and-long-random-secret-key',
     resave: false,
     saveUninitialized: false,
     cookie: {
-      secure: process.env.NODE_ENV === 'production', // true only on HTTPS in production
+      secure: process.env.NODE_ENV === 'production',
       httpOnly: true,
-      sameSite: process.env.NODE_ENV === 'production' ? 'none' : 'lax', // Fix cross-site cookies for OAuth
-    },
+      sameSite: process.env.NODE_ENV === 'production' ? 'none' : 'lax',
+    }
   })
 );
 

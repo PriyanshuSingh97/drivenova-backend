@@ -12,7 +12,7 @@ const bookingSchema = new mongoose.Schema({
   pickup_location: { type: String, required: true },
   dropoff_location: { type: String, required: true },
   services: { type: [String], default: [] },
-  total_amount: { type: String, required: true },
+  total_amount: { type: String, required: true }
 }, { timestamps: true });
 
 module.exports = mongoose.model('Booking', bookingSchema);

@@ -4,16 +4,8 @@ const mongoose = require('mongoose');
 
 const userSchema = new mongoose.Schema(
   {
-    googleId: {
-      type: String,
-      unique: true,
-      sparse: true // Allows null if you add email/password login later
-    },
-    username: {
-      type: String,
-      required: [true, 'Username is required'],
-      trim: true
-    },
+    googleId: { type: String, unique: true, sparse: true },
+    username: { type: String, required: [true, 'Username is required'], trim: true },
     email: {
       type: String,
       required: [true, 'Email is required'],
@@ -31,16 +23,12 @@ const userSchema = new mongoose.Schema(
         message: 'Profile image must be a valid URL'
       }
     },
-    role: {
-      type: String,
-      enum: ['user', 'admin'],
-      default: 'user'
-    }
+    role: { type: String, enum: ['user', 'admin'], default: 'user' }
   },
   { timestamps: true }
 );
 
-// Index for faster email lookups
 userSchema.index({ email: 1 });
 
 module.exports = mongoose.model('User', userSchema);
+
