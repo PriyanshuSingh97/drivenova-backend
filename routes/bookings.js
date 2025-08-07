@@ -1,29 +1,62 @@
-// models/Contact.js
+// routes/bookings.js
 
-const mongoose = require('mongoose');
+const express = require('express');
+const router = express.Router();
+const Booking = require('../models/Booking'); // This points to your Booking model
 
-const contactSchema = new mongoose.Schema(
-  {
-    name: {
-      type: String,
-      required: [true, 'Name is required'],
-      trim: true,
-    },
-    email: {
-      type: String,
-      required: [true, 'Email is required'],
-      trim: true,
-      lowercase: true,
-    },
-    message: {
-      type: String,
-      required: [true, 'Message is required'],
-      trim: true,
-    },
-  },
-  {
-    timestamps: true, // adds createdAt and updatedAt
+// POST /api/bookings - Save a new booking
+router.post('/', async (req, res) => {
+  try {
+    const {
+      name,
+      email,
+      phone,
+      car_model,
+      pickup_date,
+      dropoff_date,
+      pickup_location,
+      dropoff_location,
+      services,
+      total_amount
+    } = req.body;
+
+    if (
+      !name || !email || !phone || !car_model ||
+      !pickup_date || !dropoff_date ||
+      !pickup_location || !dropoff_location || !total_amount
+    ) {
+      return res.status(400).json({ error: 'All fields are required.' });
+    }
+
+    const booking = new Booking({
+      name,
+      email,
+      phone,
+      car_model,
+      pickup_date,
+      dropoff_date,
+      pickup_location,
+      dropoff_location,
+      services: Array.isArray(services) ? services : [],
+      total_amount: Number(total_amount)
+    });
+
+    await booking.save();
+    res.status(201).json({ message: 'Booking created successfully!' });
+  } catch (error) {
+    console.error('Error saving booking:', error);
+    res.status(500).json({ error: 'Server error while saving booking.' });
   }
-);
+});
 
-module.exports = mongoose.model('Contact', contactSchema);
+// (Optional) GET all bookings (for admin)
+router.get('/', async (req, res) => {
+  try {
+    const bookings = await Booking.find().sort({ createdAt: -1 });
+    res.json(bookings);
+  } catch (error) {
+    res.status(500).json({ error: 'Failed to fetch bookings' });
+  }
+});
+
+module.exports = router;
