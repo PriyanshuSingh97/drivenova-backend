@@ -13,7 +13,7 @@ const contactSchema = new mongoose.Schema({
     required: true,
     trim: true,
   },
-  subject: {
+  phone: {
     type: String,
     required: true,
     trim: true,
@@ -27,6 +27,5 @@ const contactSchema = new mongoose.Schema({
   timestamps: true,
 });
 
-// ✅ Prevent OverwriteModelError
+// Prevent OverwriteModelError in serverless environments or with hot-reloading
 module.exports = mongoose.models.Contact || mongoose.model('Contact', contactSchema);
-
