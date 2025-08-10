@@ -3,6 +3,16 @@
 const express = require('express');
 const router = express.Router();
 const Car = require('../models/Car');
+const authMiddleware = require('../middleware/authMiddleware');
+
+// Middleware to check for admin role
+const adminMiddleware = (req, res, next) => {
+  if (req.user && req.user.role === 'admin') {
+    next();
+  } else {
+    res.status(403).json({ error: 'Forbidden: Access is restricted to administrators.' });
+  }
+};
 
 // GET all cars (with optional filters)
 router.get('/', async (req, res) => {
@@ -26,8 +36,8 @@ router.get('/', async (req, res) => {
   }
 });
 
-// POST add new car (NO AUTH)
-router.post('/', async (req, res) => {
+// POST add new car (SECURED - ADMIN ONLY)
+router.post('/', authMiddleware, adminMiddleware, async (req, res) => {
   try {
     const {
       name,
@@ -78,8 +88,8 @@ router.get('/:id', async (req, res) => {
   }
 });
 
-// PUT update car by ID (NO AUTH)
-router.put('/:id', async (req, res) => {
+// PUT update car by ID (SECURED - ADMIN ONLY)
+router.put('/:id', authMiddleware, adminMiddleware, async (req, res) => {
   try {
     const update = { ...req.body };
     if (update.pricePerDay) {
@@ -99,12 +109,11 @@ router.put('/:id', async (req, res) => {
   }
 });
 
-// DELETE car by ID (NO AUTH)
-router.delete('/:id', async (req, res) => {
+// DELETE car by ID (SECURED - ADMIN ONLY)
+router.delete('/:id', authMiddleware, adminMiddleware, async (req, res) => {
   try {
     const car = await Car.findByIdAndDelete(req.params.id);
     if (!car) return res.status(404).json({ error: 'Car not found' });
-
     // Optionally delete Cloudinary image here
     res.json({ message: 'Car deleted successfully' });
   } catch (err) {

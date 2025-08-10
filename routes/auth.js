@@ -4,6 +4,7 @@ const express = require('express');
 const passport = require('passport');
 const jwt = require('jsonwebtoken');
 const authMiddleware = require('../middleware/authMiddleware');
+
 const router = express.Router();
 
 // Route to initiate Google OAuth

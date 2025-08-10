@@ -3,6 +3,16 @@
 const express = require('express');
 const router = express.Router();
 const Booking = require('../models/Booking'); // This points to your Booking model
+const authMiddleware = require('../middleware/authMiddleware');
+
+// Middleware to check for admin role
+const adminMiddleware = (req, res, next) => {
+  if (req.user && req.user.role === 'admin') {
+    next();
+  } else {
+    res.status(403).json({ error: 'Forbidden: Access is restricted to administrators.' });
+  }
+};
 
 // POST /api/bookings - Save a new booking
 router.post('/', async (req, res) => {
@@ -49,8 +59,8 @@ router.post('/', async (req, res) => {
   }
 });
 
-// (Optional) GET all bookings (for admin)
-router.get('/', async (req, res) => {
+// GET all bookings (for admin) - SECURED
+router.get('/', authMiddleware, adminMiddleware, async (req, res) => {
   try {
     const bookings = await Booking.find().sort({ createdAt: -1 });
     res.json(bookings);
