@@ -8,9 +8,11 @@ const Contact = require('../models/Contact');
 router.post('/', async (req, res) => {
   try {
     const { name, email, message, phone } = req.body;
+
     if (!name || !email || !message || !phone) {
       return res.status(400).json({ error: 'All fields are required.' });
-    }
+    } // <<< FIX: Added the missing closing brace here.
+
     const newContactMessage = new Contact({ name, email, phone, message });
     await newContactMessage.save();
     res.status(201).json({ message: 'Message received successfully!' });

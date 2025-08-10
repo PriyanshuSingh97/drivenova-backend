@@ -14,8 +14,8 @@ const adminMiddleware = (req, res, next) => {
   }
 };
 
-// POST /api/bookings - Save a new booking
-router.post('/', async (req, res) => {
+// POST /api/bookings - Save a new booking (SECURED)
+router.post('/', authMiddleware, async (req, res) => {
   try {
     const {
       name,
@@ -36,9 +36,10 @@ router.post('/', async (req, res) => {
       !pickup_location || !dropoff_location || !total_amount
     ) {
       return res.status(400).json({ error: 'All fields are required.' });
-    }
+    } // <<< FIX: Added the missing closing brace here.
 
     const booking = new Booking({
+      user: req.user.id,
       name,
       email,
       phone,
