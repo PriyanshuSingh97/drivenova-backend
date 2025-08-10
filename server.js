@@ -1,11 +1,11 @@
-// server.js
+// server.js (FIXED)
 
 require('dotenv').config();
 const express = require('express');
 const cors = require('cors');
 const session = require('express-session');
 const passport = require('passport');
-const MongoStore = require('connect-mongo'); // <<< FIX: Import MongoStore
+const MongoStore = require('connect-mongo');
 const connectDB = require('./db');
 const carRoutes = require('./routes/cars');
 const authRoutes = require('./routes/auth');
@@ -27,13 +27,14 @@ app.set('trust proxy', 1);
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
-// ✅ Define allowed CORS origins (frontend & admin)
+// ✅ *** FIX: Add your live Netlify admin panel URL to this list ***
 const allowedOrigins = [
   'http://127.0.0.1:5500',
   'http://localhost:5500',
   'http://localhost:5501',
   process.env.FRONTEND_URL,
-  process.env.ADMIN_URL
+  process.env.ADMIN_URL,
+  'https://admin-drivenova.netlify.app' // <<< IMPORTANT: REPLACE WITH YOUR ACTUAL NETLIFY URL
 ].filter(Boolean);
 
 // ✅ Configure CORS
@@ -57,7 +58,6 @@ app.use(
     secret: process.env.SESSION_SECRET || 'drive-nova-secret-key',
     resave: false,
     saveUninitialized: false,
-    // <<< FIX: Configure MongoStore for persistent sessions
     store: MongoStore.create({
       mongoUrl: process.env.MONGODB_URI,
       collectionName: 'sessions', // Optional: name of the collection to store sessions
