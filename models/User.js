@@ -17,7 +17,7 @@ const userSchema = new mongoose.Schema(
     email: {
       type: String,
       required: [true, 'Email is required'],
-      unique: true,
+      unique: true, // This already creates a unique index on the email field
       lowercase: true,
       trim: true,
       match: [/^\S+@\S+\.\S+$/, 'Please use a valid email address'],
@@ -42,7 +42,6 @@ const userSchema = new mongoose.Schema(
   { timestamps: true }
 );
 
-// For performance on queries by email
-userSchema.index({ email: 1 });
+// <<< FIX: Removed the redundant index definition below, as `unique: true` already handles it.
 
 module.exports = mongoose.model('User', userSchema);

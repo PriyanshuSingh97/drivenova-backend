@@ -5,6 +5,7 @@ const express = require('express');
 const cors = require('cors');
 const session = require('express-session');
 const passport = require('passport');
+const MongoStore = require('connect-mongo'); // <<< FIX: Import MongoStore
 const connectDB = require('./db');
 const carRoutes = require('./routes/cars');
 const authRoutes = require('./routes/auth');
@@ -50,12 +51,18 @@ app.use(
   })
 );
 
-// ✅ Express-session for Google OAuth login
+// ✅ Express-session with MongoStore for production
 app.use(
   session({
     secret: process.env.SESSION_SECRET || 'drive-nova-secret-key',
     resave: false,
     saveUninitialized: false,
+    // <<< FIX: Configure MongoStore for persistent sessions
+    store: MongoStore.create({
+      mongoUrl: process.env.MONGODB_URI,
+      collectionName: 'sessions', // Optional: name of the collection to store sessions
+      ttl: 14 * 24 * 60 * 60 // Optional: session time to live in seconds (e.g., 14 days)
+    }),
     cookie: {
       secure: process.env.NODE_ENV === 'production',
       httpOnly: true,
