@@ -31,7 +31,7 @@ router.get(
             if (!req.user) {
                 console.error('Authentication succeeded but req.user is missing.');
                 return res.redirect(`${FRONTEND_URL}?error=user_not_found`);
-            } // <<< FIX: Missing closing brace was here
+            } 
 
             // Ensure JWT secret is configured on the server
             if (!JWT_SECRET) {

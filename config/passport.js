@@ -31,7 +31,7 @@ passport.use(
           return done(new Error('Google account did not return an email.'), null);
         }
 
-        // IMPROVED: More robust user lookup logic
+        // User lookup logic
         // First, try to find by googleId. If not, try by email.
         let user = await User.findOne({ googleId: profile.id });
         if (!user) {

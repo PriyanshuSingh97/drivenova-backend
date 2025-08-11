@@ -2,7 +2,7 @@
 
 const express = require('express');
 const router = express.Router();
-const Booking = require('../models/Booking'); // This points to your Booking model
+const Booking = require('../models/Booking'); 
 const authMiddleware = require('../middleware/authMiddleware');
 
 // Middleware to check for admin role
@@ -36,7 +36,7 @@ router.post('/', authMiddleware, async (req, res) => {
             !pickup_location || !dropoff_location || !total_amount
         ) {
             return res.status(400).json({ error: 'All fields are required.' });
-        } // <<< FIX: Missing closing brace was here
+        } 
 
         const booking = new Booking({
             user: req.user.id,

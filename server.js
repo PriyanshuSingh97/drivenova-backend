@@ -1,4 +1,4 @@
-// server.js (FIXED)
+// server.js 
 
 require('dotenv').config();
 const express = require('express');
@@ -27,14 +27,14 @@ app.set('trust proxy', 1);
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
-// ✅ *** FIX: Add your live Netlify admin panel URL to this list ***
+
 const allowedOrigins = [
   'http://127.0.0.1:5500',
   'http://localhost:5500',
   'http://localhost:5501',
   process.env.FRONTEND_URL,
-  process.env.ADMIN_URL,
-  'https://admin-drivenova.netlify.app' // <<< IMPORTANT: REPLACE WITH YOUR ACTUAL NETLIFY URL
+  process.env.ADMIN_URL
+  
 ].filter(Boolean);
 
 // ✅ Configure CORS
