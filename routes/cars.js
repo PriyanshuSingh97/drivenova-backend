@@ -51,7 +51,7 @@ router.post('/', authMiddleware, adminMiddleware, async (req, res) => {
         console.error('Error adding new car:', err);
         if (err.code === 11000) {
             return res.status(400).json({ error: 'A car with this license plate already exists.' });
-        } // <<< FIX: Missing closing brace was here
+        } 
         res.status(500).json({ error: 'Failed to add new car' });
     }
 });
