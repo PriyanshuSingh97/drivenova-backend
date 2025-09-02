@@ -3,7 +3,7 @@
 const mongoose = require('mongoose');
 
 const bookingSchema = new mongoose.Schema({
-    // ADDED: Reference to the User model
+    // Reference to the User model
     user: { type: mongoose.Schema.Types.ObjectId, ref: 'User', required: true },
     name: { type: String, required: true, trim: true },
     email: { type: String, required: true, trim: true },

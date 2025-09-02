@@ -60,8 +60,8 @@ app.use(
     saveUninitialized: false,
     store: MongoStore.create({
       mongoUrl: process.env.MONGODB_URI,
-      collectionName: 'sessions', // Optional: name of the collection to store sessions
-      ttl: 14 * 24 * 60 * 60 // Optional: session time to live in seconds (e.g., 14 days)
+      collectionName: 'sessions', // Name of the collection to store sessions
+      ttl: 14 * 24 * 60 * 60 // Session time to live in seconds
     }),
     cookie: {
       secure: process.env.NODE_ENV === 'production',
@@ -86,12 +86,12 @@ app.get('/', (req, res) => {
   res.json({ message: '✅ DriveNova backend is running!' });
 });
 
-// ADDED: Handle 404 Not Found errors
+// Handle 404 Not Found errors
 app.use((req, res, next) => {
   res.status(404).json({ error: `Route not found: ${req.originalUrl}` });
 });
 
-// ADDED: Global error handler
+// Global error handler
 app.use((err, req, res, next) => {
   console.error('❌ Global Error Handler:', err.stack);
   res.status(500).json({ error: 'An unexpected server error occurred.' });
