@@ -49,6 +49,28 @@ const carSchema = new mongoose.Schema(
       required: [true, 'Category is required'],
       enum: ['sedan', 'suv', 'luxury', 'electric', 'truck', 'other'],
     },
+
+    //  Specs with enums for validation
+    specs: {
+      fuel: {
+        type: String,
+        trim: true,
+        enum: ['petrol', 'diesel', 'electric', 'hybrid'],
+        default: 'petrol',
+      },
+      transmission: {
+        type: String,
+        trim: true,
+        enum: ['Manual', 'Automatic'],
+        default: 'Manual',
+      },
+      seats: {
+        type: Number,
+        default: 5,
+        min: [2, 'Car must have at least 2 seats'],
+        max: [9, 'Car cannot have more than 9 seats'],
+      },
+    },
   },
   {
     timestamps: true,
