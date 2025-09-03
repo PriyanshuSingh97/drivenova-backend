@@ -4,12 +4,11 @@ const express = require('express');
 const passport = require('passport');
 const jwt = require('jsonwebtoken');
 const authMiddleware = require('../middleware/authMiddleware');
-
 const router = express.Router();
 
 const FRONTEND_URL = process.env.FRONTEND_URL || 'http://localhost:5500';
 
-// Route to initiate Google OAuth
+// Google OAuth Routes
 router.get(
     '/google',
     passport.authenticate('google', { scope: ['profile', 'email'] })
@@ -31,7 +30,7 @@ router.get(
             if (!req.user) {
                 console.error('Authentication succeeded but req.user is missing.');
                 return res.redirect(`${FRONTEND_URL}?error=user_not_found`);
-            } 
+            }
 
             // Ensure JWT secret is configured on the server
             if (!JWT_SECRET) {
@@ -53,9 +52,8 @@ router.get(
             // Safely append the token to the frontend URL
             const redirectUrl = new URL(FRONTEND_URL);
             redirectUrl.searchParams.set('token', token);
-            redirectUrl.searchParams.set('user_id', req.user._id); // Optionally send user ID
-            redirectUrl.searchParams.set('user_role', req.user.role); // Optionally send role for frontend logic
-
+            redirectUrl.searchParams.set('user_id', req.user._id);
+            redirectUrl.searchParams.set('user_role', req.user.role);
             res.redirect(redirectUrl.toString());
         } catch (error) {
             console.error('Error during JWT generation or redirect:', error);
@@ -64,9 +62,51 @@ router.get(
     }
 );
 
-// Protected route to get user data if JWT is valid
+// GitHub OAuth Routes
+router.get(
+    '/github',
+    passport.authenticate('github', { scope: ['user:email'] })
+);
+
+router.get(
+    '/github/callback',
+    passport.authenticate('github', {
+        failureRedirect: `${FRONTEND_URL}?error=auth_failed`,
+        session: false,
+    }),
+    (req, res) => {
+        
+        try {
+            const JWT_SECRET = process.env.JWT_SECRET;
+            if (!req.user) {
+                console.error('GitHub authentication succeeded but req.user is missing.');
+                return res.redirect(`${FRONTEND_URL}?error=user_not_found`);
+            }
+            if (!JWT_SECRET) {
+                console.error('JWT_SECRET not set in environment variables.');
+                return res.redirect(`${FRONTEND_URL}?error=server_config_issue`);
+            }
+            const payload = {
+                id: req.user._id,
+                username: req.user.username,
+                email: req.user.email,
+                role: req.user.role,
+            };
+            const token = jwt.sign(payload, JWT_SECRET, { expiresIn: '7d' });
+            const redirectUrl = new URL(FRONTEND_URL);
+            redirectUrl.searchParams.set('token', token);
+            redirectUrl.searchParams.set('user_id', req.user._id);
+            redirectUrl.searchParams.set('user_role', req.user.role);
+            res.redirect(redirectUrl.toString());
+        } catch (error) {
+            console.error('Error during GitHub JWT generation or redirect:', error);
+            res.redirect(`${FRONTEND_URL}?error=token_signing_failed`);
+        }
+    }
+);
+
+// Protected Route
 router.get('/me', authMiddleware, (req, res) => {
-    // authMiddleware attaches user info to req.user
     res.status(200).json({ user: req.user });
 });
 

@@ -9,6 +9,11 @@ const userSchema = new mongoose.Schema(
       unique: true,
       sparse: true, // Allows multiple nulls, essential for unique index
     },
+    githubId: {
+      type: String,
+      unique: true,
+      sparse: true, // Allows for multiple null documents
+    },
     username: {
       type: String,
       required: [true, 'Username is required'],
