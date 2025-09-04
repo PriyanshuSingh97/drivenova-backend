@@ -72,7 +72,7 @@ router.get('/:id', async (req, res) => {
   }
 });
 
-// PUT (update) a car by ID (SECURED - ADMIN ONLY)
+// PUT update a car by ID (SECURED - ADMIN ONLY)
 router.put('/:id', authMiddleware, adminMiddleware, async (req, res) => {
   try {
     const update = { ...req.body };
