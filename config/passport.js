@@ -74,6 +74,7 @@ passport.use(
     async (accessToken, refreshToken, profile, done) => {
       try {
         const email = profile.emails && profile.emails[0] ? profile.emails[0].value : null;
+
         if (!email) {
           return done(new Error('GitHub account did not return a public email.'), null);
         }
@@ -83,18 +84,22 @@ passport.use(
         if (!user) {
           user = await User.findOne({ email: email });
           if (user) {
+            // User exists with this email, so link the GitHub account
             user.githubId = profile.id;
             user.profileImage = user.profileImage || profile._json.avatar_url || '';
             await user.save();
           } else {
+            // Create new user 
             user = await User.create({
               githubId: profile.id,
-              username: profile.username || profile.displayName,
+              username: profile.username || profile.displayName || email.split('@')[0],
               email: email,
               profileImage: profile._json.avatar_url || '',
+              role: 'user', 
             });
           }
         }
+
         return done(null, user);
       } catch (err) {
         console.error('Error during GitHub OAuth:', err);
