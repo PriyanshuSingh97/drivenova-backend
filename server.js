@@ -1,4 +1,4 @@
-// server.js 
+// server.js
 
 require('dotenv').config();
 const express = require('express');
@@ -27,14 +27,13 @@ app.set('trust proxy', 1);
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
-
 const allowedOrigins = [
   'http://127.0.0.1:5500',
   'http://localhost:5500',
   'http://localhost:5501',
+  'http://127.0.0.1:5501', 
   process.env.FRONTEND_URL,
   process.env.ADMIN_URL
-  
 ].filter(Boolean);
 
 // ✅ Configure CORS
