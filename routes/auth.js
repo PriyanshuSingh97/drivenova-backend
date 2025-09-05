@@ -186,6 +186,7 @@ router.get(
   passport.authenticate('github', { scope: ['user:email'] })
 );
 
+// GitHub OAuth callback
 router.get(
   '/github/callback',
   passport.authenticate('github', {
@@ -195,7 +196,6 @@ router.get(
   (req, res) => {
     try {
       const JWT_SECRET = process.env.JWT_SECRET;
-
       if (!req.user) {
         console.error('GitHub authentication succeeded but req.user is missing.');
         return res.redirect(`${FRONTEND_URL}?error=user_not_found`);
@@ -217,8 +217,8 @@ router.get(
 
       const redirectUrl = new URL(FRONTEND_URL);
       redirectUrl.searchParams.set('token', token);
-      redirectUrl.search_params.set('user_id', req.user._id);
-      redirectUrl.search_params.set('user_role', req.user.role);
+      redirectUrl.searchParams.set('user_id', req.user._id);
+      redirectUrl.searchParams.set('user_role', req.user.role);
 
       res.redirect(redirectUrl.toString());
     } catch (error) {
@@ -227,6 +227,7 @@ router.get(
     }
   }
 );
+
 
 
 // Protected Route
