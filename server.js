@@ -1,5 +1,4 @@
 // server.js
-
 require('dotenv').config();
 const express = require('express');
 const cors = require('cors');
@@ -17,13 +16,13 @@ require('./config/passport'); // Initialize passport configuration
 const app = express();
 const PORT = process.env.PORT || 5000;
 
-// ✅ Connect to MongoDB Atlas
+// Connect to MongoDB Atlas
 connectDB();
 
-// ✅ Trust the reverse proxy (important for Render/Heroku)
+// Trust the reverse proxy (important for Render/Heroku)
 app.set('trust proxy', 1);
 
-// ✅ Middleware for JSON and form data
+// Middleware for JSON and form data
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
@@ -36,7 +35,7 @@ const allowedOrigins = [
   process.env.ADMIN_URL
 ].filter(Boolean);
 
-// ✅ Configure CORS
+// Configure CORS
 app.use(
   cors({
     origin: function (origin, callback) {
@@ -51,7 +50,7 @@ app.use(
   })
 );
 
-// ✅ Express-session with MongoStore for production
+// Express-session with MongoStore for production
 app.use(
   session({
     secret: process.env.SESSION_SECRET || 'drive-nova-secret-key',
@@ -70,17 +69,17 @@ app.use(
   })
 );
 
-// ✅ Initialize Passport.js
+// Initialize Passport.js
 app.use(passport.initialize());
 app.use(passport.session());
 
-// ✅ API Routes
+// API Routes
 app.use('/api/cars', carRoutes);
 app.use('/api/bookings', bookingRoutes);
 app.use('/api/contact', contactRoutes);
 app.use('/api/auth', authRoutes);
 
-// ✅ Health check
+// Health check
 app.get('/', (req, res) => {
   res.json({ message: '✅ DriveNova backend is running!' });
 });
@@ -96,7 +95,7 @@ app.use((err, req, res, next) => {
   res.status(500).json({ error: 'An unexpected server error occurred.' });
 });
 
-// ✅ Start server
+// Start server
 app.listen(PORT, () => {
   console.log(`🚀 Server is running on port ${PORT}`);
 });

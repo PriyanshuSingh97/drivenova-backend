@@ -1,5 +1,4 @@
 // routes/auth.js
-
 const express = require('express');
 const passport = require('passport');
 const jwt = require('jsonwebtoken');
@@ -124,7 +123,6 @@ router.post('/login', async (req, res) => {
   }
 });
 
-
 // Google OAuth Routes
 router.get(
   '/google',
@@ -136,7 +134,7 @@ router.get(
   '/google/callback',
   passport.authenticate('google', {
     failureRedirect: `${FRONTEND_URL}?error=auth_failed`,
-    session: false, // We are using JWT, so no session is needed
+    session: false, // Using JWT, so no session is needed
   }),
   // This is the final handler that runs after successful authentication
   (req, res) => {
@@ -227,8 +225,6 @@ router.get(
     }
   }
 );
-
-
 
 // Protected Route
 router.get('/me', authMiddleware, (req, res) => {

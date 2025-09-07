@@ -1,5 +1,4 @@
 // config/passport.js
-
 const passport = require('passport');
 const GoogleStrategy = require('passport-google-oauth20').Strategy;
 const GitHubStrategy = require('passport-github2').Strategy;
@@ -32,17 +31,17 @@ passport.use(
         }
 
         // User lookup logic
-        // First, try to find by googleId. If not, try by email
+        // First try to find by googleId. If not try by email
         let user = await User.findOne({ googleId: profile.id });
         if (!user) {
           user = await User.findOne({ email: email });
           if (user) {
-            // User exists with this email, so link the Google account
+            // User exists with this email so link the Google account
             user.googleId = profile.id;
             user.profileImage = user.profileImage || profile.photos?.[0]?.value || '';
             await user.save();
           } else {
-            // No user found, create a new one
+            // No user found create a new one
             const username = profile.displayName || email.split('@')[0] || `googleuser_${profile.id}`;
             user = await User.create({
               googleId: profile.id,
@@ -84,7 +83,7 @@ passport.use(
         if (!user) {
           user = await User.findOne({ email: email });
           if (user) {
-            // User exists with this email, so link the GitHub account
+            // User exists with this email so link the GitHub account
             user.githubId = profile.id;
             user.profileImage = user.profileImage || profile._json.avatar_url || '';
             await user.save();

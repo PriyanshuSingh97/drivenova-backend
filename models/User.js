@@ -1,5 +1,4 @@
 // models/User.js
-
 const mongoose = require('mongoose');
 
 const userSchema = new mongoose.Schema(
@@ -7,7 +6,7 @@ const userSchema = new mongoose.Schema(
     googleId: {
       type: String,
       unique: true,
-      sparse: true, // Allows multiple nulls, essential for unique index
+      sparse: true, // Allows multiple nulls essential for unique index
     },
     githubId: {
       type: String,
@@ -30,7 +29,7 @@ const userSchema = new mongoose.Schema(
     password: {
       type: String,
       required: function() {
-        // Only required if no OAuth IDs present (for email/password users)
+        // Only required if no OAuth IDs present for email/password users
         return !this.googleId && !this.githubId;
       },
       minlength: [6, 'Password must be at least 6 characters'],

@@ -1,5 +1,4 @@
 // routes/cars.js
-
 const express = require('express');
 const router = express.Router();
 const Car = require('../models/Car');
@@ -110,6 +109,5 @@ router.delete('/:id', authMiddleware, adminMiddleware, async (req, res) => {
     res.status(500).json({ error: 'Failed to delete car' });
   }
 });
-
 
 module.exports = router;

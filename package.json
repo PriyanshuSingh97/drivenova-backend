@@ -1,7 +1,7 @@
 {
   "name": "backend",
   "version": "1.0.0",
-  "description": "DriveNova backend server with MongoDB Atlas, Google OAuth, Cloudinary, and Express.js",
+  "description": "DriveNova backend server with MongoDB Atlas, Google OAuth, Github OAuth, Cloudinary, and Express.js",
   "main": "server.js",
   "scripts": {
     "start": "node server.js",
@@ -13,10 +13,11 @@
     "mongodb",
     "cloudinary",
     "google-oauth",
+    "github-oauth",
     "backend"
   ],
   "author": "Priyanshu Singh",
-  "license": "ISC",
+  "license": "UNLICENSED",
   "dependencies": {
     "bcryptjs": "^3.0.2",
     "cloudinary": "^2.2.0",
