@@ -15,17 +15,18 @@
 - Session store: Mongo-backed session for Passport OAuth handshake; JWT used for API auth.
 
 ## Project Structure
-server.js — app bootstrap: DB connect, sessions, CORS, routes, error handling.
-db.js — MongoDB connection helper.
-config/passport.js — Google/GitHub strategies, user linking by email, session serialization.
-config/cloudinary.js — Cloudinary credentials/config.
-middleware/authMiddleware.js — Bearer token verification for protected routes.
-models/ — User, Car, Booking, Contact schemas with indexes and validation.
+- server.js — app bootstrap: DB connect, sessions, CORS, routes, error handling.
+- db.js — MongoDB connection helper.
+- config/passport.js — Google/GitHub strategies, user linking by email, session serialization.
+- config/cloudinary.js — Cloudinary credentials/config.
+- middleware/authMiddleware.js — Bearer token verification for protected routes.
+- models/ — User, Car, Booking, Contact schemas with indexes and validation.
+- 
 routes/
-/api/auth — register/login, OAuth routes, /me.
-/api/cars — list, get, create, update, delete (admin only on mutations).
-/api/bookings — create (auth), list all (admin).
-/api/contact — submit message.
+- /api/auth — register/login, OAuth routes, /me.
+- /api/cars — list, get, create, update, delete (admin only on mutations).
+- /api/bookings — create (auth), list all (admin).
+- /api/contact — submit message.
 
 ## Important Note
 - This backend repository works together with the DriveNova Frontend.  
