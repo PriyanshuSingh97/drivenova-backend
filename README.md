@@ -21,12 +21,10 @@
 - config/cloudinary.js — Cloudinary credentials/config.
 - middleware/authMiddleware.js — Bearer token verification for protected routes.
 - models/ — User, Car, Booking, Contact schemas with indexes and validation.
-- 
-routes/
-- /api/auth — register/login, OAuth routes, /me.
-- /api/cars — list, get, create, update, delete (admin only on mutations).
-- /api/bookings — create (auth), list all (admin).
-- /api/contact — submit message.
+- routes/auth — register/login, OAuth routes, /me.
+- routes/cars — list, get, create, update, delete (admin only on mutations).
+- routes/bookings — create (auth), list all (admin).
+- routes/contact — submit message.
 
 ## Important Note
 - This backend repository works together with the DriveNova Frontend.  
