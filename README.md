@@ -7,7 +7,7 @@
 👉 [DriveNova Backend](https://drivenova-backend.onrender.com)
 
 ## Features
-- Auth: Email/password, Google OAuth, GitHub OAuth; backend issues JWT for frontend consumption.
+- Auth: Email/password, Google OAuth, GitHub OAuth.
 - Car listing management
 - Cars: CRUD with admin-only protection; Cloudinary cleanup on delete when imagePublicId exists.
 - Bookings: Authenticated creation; admin can list all bookings.
