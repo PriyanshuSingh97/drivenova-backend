@@ -1,18 +1,18 @@
 # 🚗 DriveNova — Backend (API)
+- This is the backend of the DriveNova project.  
+- It powers the frontend by handling car data, user management, booking flows, media management, and secure authentication.
 
-🌐 **Live Backend API:** [https://drivenova-backend.onrender.com](https://drivenova-backend.onrender.com)
-
-This repository contains the **backend** of the DriveNova project. It powers the application with authentication, data storage, and server-side logic.
+## 🌐 Live API
+👉 [DriveNova Backend](https://drivenova-backend.onrender.com)
 
 ---
 
 ## ⚡ Features
-- RESTful API with Express.js
-- User authentication (JWT + OAuth with Google & GitHub)
-- Car management (CRUD operations, admin-only)
-- Booking management
-- Contact form handling
-- Cloudinary integration for image uploads
+- Authentication: Email/password, Google OAuth, GitHub OAuth
+- Cars: CRUD with admin-only protection; Cloudinary cleanup on delete when `imagePublicId` exists
+- Bookings: Authenticated creation; admin can list all bookings
+- Contact: Store contact messages
+- Session store: Mongo-backed session for Passport OAuth handshake; JWT used for API auth
 
 ---
 
