@@ -14,7 +14,7 @@
 - Contact: Store contact messages.
 - Session store: Mongo-backed session for Passport OAuth handshake; JWT used for API auth.
 
-##Project Structure
+## Project Structure
 server.js — app bootstrap: DB connect, sessions, CORS, routes, error handling.
 db.js — MongoDB connection helper.
 config/passport.js — Google/GitHub strategies, user linking by email, session serialization.
