@@ -14,6 +14,17 @@ const adminMiddleware = (req, res, next) => {
     }
 };
 
+// GET /api/bookings/user - Get user's booking history (SECURED)
+router.get('/user', authMiddleware, async (req, res) => {
+  try {
+    const bookings = await Booking.find({ user: req.user.id }).sort({ createdAt: -1 });
+    res.json(bookings);
+  } catch (err) {
+    console.error('Error fetching user bookings:', err);
+    res.status(500).json({ error: 'Failed to fetch booking history' });
+  }
+});
+
 // POST /api/bookings - Save a new booking (SECURED)
 router.post('/', authMiddleware, async (req, res) => {
     try {
