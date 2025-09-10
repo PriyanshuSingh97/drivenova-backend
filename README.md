@@ -47,6 +47,9 @@ backend/
 │   ├── Booking.js            # Booking schema
 │   └── Contact.js            # Contact schema
 │
+├── utils/
+│   └── email.js              # Email utility
+│
 ├── routes/
 │   ├── auth.js               # Authentication routes
 │   ├── cars.js               # Car CRUD routes
