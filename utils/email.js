@@ -17,11 +17,10 @@ const transporter = nodemailer.createTransport({
     },
 });
 
-/**
- * Sends a notification email to the site owner.
- * @param {string} subject - The subject line of the email.
- * @param {string} htmlContent - The HTML content for the email body.
- */
+// Sends a notification email to the site owner
+// @param {string} subject - Subject line of the email
+// @param {string} htmlContent - HTML body content of the email
+
 const sendNotificationEmail = async (subject, htmlContent) => {
     // Silently fail if the email service is not configured, preventing crashes
     if (!transporter.options.host) {
